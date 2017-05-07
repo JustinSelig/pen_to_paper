@@ -137,5 +137,5 @@ if __name__ == '__main__':
   p = GPIO.PWM(PWM_PIN, 10)
 
   server = msgpackrpc.Server(PlotterInterface(stepper_left, stepper_right, p))
-  server.listen(msgpackrpc.Address("localhost", 18801))
+  server.listen(msgpackrpc.Address("localhost", 18800))
   server.start()

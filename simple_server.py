@@ -57,6 +57,7 @@ class SimpleServer(object):
 			self.total_right -= 1
 
 if __name__ == '__main__':
+	GPIO.cleanup()
 	# create a default object, no changes to I2C address or frequency
 	mh = Adafruit_MotorHAT()
 
@@ -84,8 +85,14 @@ if __name__ == '__main__':
 	# Set to 50Hz
 	p = GPIO.PWM(PWM_PIN, 10)
 
+	#try:
 	server = msgpackrpc.Server(SimpleServer(stepper_left, stepper_right, p))
-	server.listen(msgpackrpc.Address("localhost", 18800))
+	server.listen(msgpackrpc.Address("localhost", 18801))
 	server.start()
+	GPIO.cleanup()
+
+	#except:
+	#	server.stop()
+	#	server.close()
 
 
