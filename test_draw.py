@@ -7,12 +7,16 @@ import os
 import msgpackrpc
 import random
 
+INCREASE = 1
+DECREASE = -1
+
 #screen = pygame.display.set_mode((800,600))
 global client
 
 def draw_to_paper(dx, dy):
     global client
-    client.call('pen_down')
+    #client.call('pen_down')
+    client.call('tick_left', INCREASE)
 
 """
 Below code adapted from Stack Overflow post:
