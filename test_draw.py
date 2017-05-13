@@ -10,32 +10,41 @@ import random
 INCREASE = 1
 DECREASE = -1
 
+HOSTNAME = "localhost"
+PORT = 18803
+
 #screen = pygame.display.set_mode((800,600))
 global client
 
 def draw_to_paper(dx, dy):
-    global client
-    #client.call('pen_down')
-    client.call('tick_left', INCREASE)
+	global client
+	#client.call('pen_down')
+	client.call('tick_left', INCREASE)
+	#for x in range(abs(dx)):
+	#	client.call()
+
+def move(dx, dy):
+	global client
+	client.call('move', dx, dy)
 
 """
 Below code adapted from Stack Overflow post:
 http://stackoverflow.com/questions/597369/how-to-create-ms-paint-clone-with-python-and-pygame/5900836
 """
 def roundline(srf, color, start, end, radius=1):
-    dx = end[0]-start[0]
-    dy = end[1]-start[1]
-    print dx, dy
-    distance = max(abs(dx), abs(dy))
-    for i in range(distance):
-        x = int( start[0]+float(i)/distance*dx)
-        y = int( start[1]+float(i)/distance*dy)
-        pygame.draw.circle(srf, color, (x, y), radius)
-    return (dx, dy)
+	dx = end[0]-start[0]
+	dy = end[1]-start[1]
+	print dx, dy
+	distance = max(abs(dx), abs(dy))
+	for i in range(distance):
+		x = int( start[0]+float(i)/distance*dx)
+		y = int( start[1]+float(i)/distance*dy)
+		pygame.draw.circle(srf, color, (x, y), radius)
+	return (dx, dy)
 
 def main():
 	global client
-	client = msgpackrpc.Client(msgpackrpc.Address("localhost", 18801)) #next, accept host as argument and port
+	client = msgpackrpc.Client(msgpackrpc.Address(HOSTNAME, PORT)) #next, accept host as argument and port
 
 	#uncomment below line to run on tft screen
 	#os.putenv('SDL_VIDEODRIVER', 'fbcon') # Display on piTFT
@@ -57,26 +66,27 @@ def main():
 	radius = 1
 
 	try:
-	    while True:
-	        e = pygame.event.wait()
-	        if e.type == pygame.QUIT:
-	            raise StopIteration
-	        if e.type == pygame.MOUSEBUTTONDOWN:
-	            color = (random.randrange(256), random.randrange(256), random.randrange(256))
-	            pygame.draw.circle(screen, color, e.pos, radius)
-	            draw_on = True
-	        if e.type == pygame.MOUSEBUTTONUP:
-	            draw_on = False
-	        if e.type == pygame.MOUSEMOTION:
-	            if draw_on:
-	                pygame.draw.circle(screen, color, e.pos, radius)
-	                (motor_dx, motor_dy) = roundline(screen, color, e.pos, last_pos, radius)
-			draw_to_paper(motor_dx, motor_dy)
-	            last_pos = e.pos
-	        pygame.display.flip()
+		while True:
+			e = pygame.event.wait()
+			if e.type == pygame.QUIT:
+				raise StopIteration
+			if e.type == pygame.MOUSEBUTTONDOWN:
+				color = (random.randrange(256), random.randrange(256), random.randrange(256))
+				pygame.draw.circle(screen, color, e.pos, radius)
+				draw_on = True
+			if e.type == pygame.MOUSEBUTTONUP:
+				draw_on = False
+			if e.type == pygame.MOUSEMOTION:
+				if draw_on:
+					pygame.draw.circle(screen, color, e.pos, radius)
+					(motor_dx, motor_dy) = roundline(screen, color, e.pos, last_pos, radius)
+					#draw_to_paper(motor_dx, motor_dy)
+					move(motor_dx, motor_dy)
+	        		last_pos = e.pos
+			pygame.display.flip()
 
 	except StopIteration:
-	    pass
+		pass
 
 	pygame.quit()
 

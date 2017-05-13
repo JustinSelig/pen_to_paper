@@ -13,6 +13,8 @@ PWM_PIN = 22
 INCREASE = 1
 DECREASE = -1
 
+HOSTNAME = "localhost"
+PORT = 18803
 
 def stepper_worker(stepper, numsteps, direction, style):
 	stepper.step(numsteps, direction, style)
@@ -27,9 +29,13 @@ def tick(stepper, direction, steps=1):
 		pass
 
 def tick_async(stepper, direction, steps=1):
-	worker = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
-	worker.start()
-	return worker
+	try:
+		worker = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
+		worker.start()
+		print threading.active_count()
+		return worker
+	except:
+		print "moving too fast - too many threads generated - please wait to continue"
 
 def turnOffMotors():
 	mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
@@ -70,6 +76,17 @@ class SimpleServer(object):
 			tick_async(self.left, Adafruit_MotorHAT.FORWARD)
 			self.total_left -= 1
 
+	def move(self, dx, dy):
+		if (dx>=0):
+			tick_async(self.right, Adafruit_MotorHAT.FORWARD, dx)
+		else:
+			tick_async(self.right, Adafruit_MotorHAT.BACKWARD, abs(dx))
+		if (dy>=0):
+                        tick_async(self.left, Adafruit_MotorHAT.FORWARD, dy)
+                else:
+                        tick_async(self.left, Adafruit_MotorHAT.BACKWARD, abs(dy))
+
+
 
 if __name__ == '__main__':
 	GPIO.cleanup()
@@ -103,7 +120,7 @@ if __name__ == '__main__':
 	
 	#try:
 	server = msgpackrpc.Server(SimpleServer(stepper_left, stepper_right,1))#, p))
-	server.listen(msgpackrpc.Address("localhost", 18801))
+	server.listen(msgpackrpc.Address(HOSTNAME, PORT))
 	server.start()
 	GPIO.cleanup()
 
