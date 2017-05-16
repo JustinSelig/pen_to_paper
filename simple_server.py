@@ -171,7 +171,7 @@ class SimpleServer(object):
 
 				while right_worker.isAlive() or left_worker.isAlive():
 					#print 'in while'
-					time.sleep(0.01)
+					time.sleep(0.05)
 					pass
 
 

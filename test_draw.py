@@ -28,7 +28,7 @@ def move(dx, dy):
 	#print 'calling move'
 	#client.call('move', 5, 5)
 	#print 'returning'
-	#client.call('move', dx, dy)
+	client.call('move', 20*dx, 20*dy)
 	if dx>0:
 		dx = 5
 	if dy>0:
@@ -37,7 +37,7 @@ def move(dx, dy):
 		dx = -5
 	if dy<0:
 		dy = -5
-	client.call('move', dx, dy)
+	#client.call('move', dx, dy)
 
 """
 Below code adapted from Stack Overflow post:
