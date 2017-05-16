@@ -25,18 +25,6 @@ def draw_to_paper(dx, dy):
 
 def move(dx, dy):
 	global client
-	#print 'calling move'
-	#client.call('move', 5, 5)
-	#print 'returning'
-	#client.call('move', dx, dy)
-	if dx>0:
-		dx = 5
-	if dy>0:
-		dy = 5
-	if dx<0:
-		dx = -5
-	if dy<0:
-		dy = -5
 	client.call('move', dx, dy)
 
 """
@@ -77,29 +65,10 @@ def main():
 	color = (255, 128, 0)
 	radius = 1
 
-	try:
-		while True:
-			#time.sleep(0.01)
-			e = pygame.event.wait()
-			if e.type == pygame.QUIT:
-				raise StopIteration
-			if e.type == pygame.MOUSEBUTTONDOWN:
-				color = (random.randrange(256), random.randrange(256), random.randrange(256))
-				pygame.draw.circle(screen, color, e.pos, radius)
-				draw_on = True
-			if e.type == pygame.MOUSEBUTTONUP:
-				draw_on = False
-			if e.type == pygame.MOUSEMOTION:
-				if draw_on:
-					pygame.draw.circle(screen, color, e.pos, radius)
-					(motor_dx, motor_dy) = roundline(screen, color, e.pos, last_pos, radius)
-					#draw_to_paper(motor_dx, motor_dy)
-					move(motor_dx, motor_dy)
-	        		last_pos = e.pos
-			pygame.display.flip()
-
-	except StopIteration:
-		pass
+	movements = [(15,0),(5,0),(15,0),(5,0),(15,0),(5,0),(15,0),(15,0),(5,0),(5,0),(15,0),(15,0),(5,0),(15,0),(5,0),(15,0),(15,0)]
+	for mov in movements:
+		move(mov[0], mov[1])
+		time.sleep(0.1)
 
 	pygame.quit()
 

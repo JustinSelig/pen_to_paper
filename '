@@ -143,26 +143,26 @@ class SimpleServer(object):
 
 	def move_dispatch(self):
 		while True:
-			#time.sleep(0.1)
+			#time.sleep(0.2)
 			#print self.move_queue
 			#with self.move_queue_lock:
 			if self.move_queue:
 				(dx, dy) = self.move_queue.pop(0)
 				if (dx>=0):
 					#tick_step(self.right, Adafruit_MotorHAT.FORWARD, dx)
-					right_worker = threading.Thread(target=stepper_worker, args=(self.right, dx, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.SINGLE))
+					right_worker = threading.Thread(target=stepper_worker, args=(self.right, dx, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.INTERLEAVE))
 
 				else:
 					#tick_step(self.right, Adafruit_MotorHAT.BACKWARD, abs(dx))
-					right_worker = threading.Thread(target=stepper_worker, args=(self.right, abs(dx), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.SINGLE))
+					right_worker = threading.Thread(target=stepper_worker, args=(self.right, abs(dx), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.INTERLEAVE))
 
 				if (dy>=0):
 					#tick_step(self.left, Adafruit_MotorHAT.FORWARD, dy)
-                                        left_worker = threading.Thread(target=stepper_worker, args=(self.left, dy, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.SINGLE))
+                                        left_worker = threading.Thread(target=stepper_worker, args=(self.left, dy, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.INTERLEAVE))
 
 				else:
 					#tick_step(self.left, Adafruit_MotorHAT.BACKWARD, abs(dy))
-					left_worker = threading.Thread(target=stepper_worker, args=(self.left, abs(dy), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.SINGLE))
+					left_worker = threading.Thread(target=stepper_worker, args=(self.left, abs(dy), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.INTERLEAVE))
 
 				#worker1 = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
 				#worker2 = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
@@ -171,7 +171,6 @@ class SimpleServer(object):
 
 				while right_worker.isAlive() or left_worker.isAlive():
 					#print 'in while'
-					time.sleep(0.01)
 					pass
 
 
@@ -184,10 +183,10 @@ if __name__ == '__main__':
 
 	atexit.register(turnOffMotors)
 
-	stepper_left = mh.getStepper(1, 1)          # 200 steps/rev, motor port #1
-	stepper_right = mh.getStepper(1, 2)         # 200 steps/rev, motor port #1
-	stepper_left.setSpeed(200000000)            # 30 RPM
-	stepper_right.setSpeed(200000000)           # 30 RPM
+	stepper_left = mh.getStepper(20000, 1)          # 200 steps/rev, motor port #1
+	stepper_right = mh.getStepper(20000, 2)         # 200 steps/rev, motor port #1
+	stepper_left.setSpeed(2)            # 30 RPM
+	stepper_right.setSpeed(2)           # 30 RPM
 
 	"""
 	st1 = threading.Thread(target=stepper_worker, args=(stepper_left, 400, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.DOUBLE))
