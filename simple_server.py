@@ -14,8 +14,8 @@ PWM_PIN = 22
 INCREASE = 1
 DECREASE = -1
 
-#HOSTNAME = "128.253.17.173"
-HOSTNAME = 'localhost'
+HOSTNAME = "128.253.17.173"
+#HOSTNAME = 'localhost'
 PORT = 18803
 
 def stepper_worker(stepper, numsteps, direction, style):
