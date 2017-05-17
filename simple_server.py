@@ -8,12 +8,14 @@ import math
 import msgpackrpc
 import socket
 import RPi.GPIO as GPIO
+import os
 
 PWM_PIN = 22
 INCREASE = 1
 DECREASE = -1
 
-HOSTNAME = "localhost"
+#HOSTNAME = "128.253.17.173"
+HOSTNAME = 'localhost'
 PORT = 18803
 
 def stepper_worker(stepper, numsteps, direction, style):
@@ -79,7 +81,31 @@ class SimpleServer(object):
 		self.move_queue = []
 		self.move_thread = threading.Thread(target=self.move_dispatch)
 		self.move_thread.start()
-		self.move_queue_lock = threading.Lock()
+		#self.move_queue_lock = threading.Lock()
+		self.is_paused = False
+
+	#zeros the plotter based on its current total x and y position
+	def zero(self):
+		pass
+
+	#moves to specified x, y coordinate based on current position
+	def move_to(self, x, y):
+		pass
+
+	#tells plotter approximately where its head is based on input
+	def calibrate(self, x, y):
+		pass
+
+	def quit(self):
+		turnOffMotors()
+		#self.stop()
+		GPIO.cleanup()
+		#self.close()
+		os._exit(0)
+		quit()
+
+	def pause(self):
+		self.is_paused = not self.is_paused
 
 	def pen_down(self):
 		self.servo.start(20/10)
@@ -107,6 +133,10 @@ class SimpleServer(object):
 
 	#not currently used
 	def move1(self, dx, dy):
+		#bounds check
+		#if self.total_left>2500 or self.total_left<-2500 or self.total_right>2500 or self.total_right<-2500:
+		#	return -1
+
 		if (dx>=0):
 			tick(self.right, Adafruit_MotorHAT.FORWARD, dx)
 		else:
@@ -117,7 +147,11 @@ class SimpleServer(object):
                         tick(self.left, Adafruit_MotorHAT.BACKWARD, abs(dy))
 
 
+	#spawns thread to push dx,dy to move queue so that client is free to continue reading input
+	#figure out how to notify client that out of bounds
 	def move(self, dx, dy):
+		#if self.total_left>2500 or self.total_left<-2500 or self.total_right>2500 or self.total_right<-2500:
+		#	return -1
 		#global move_queue
 		#with self.move_queue_lock:
 		##self.move_queue.append((dx, dy))
@@ -126,12 +160,14 @@ class SimpleServer(object):
 		t = threading.Thread(target=self.push, args=(dx,dy))
 		t.start()
 		print 'in move'
+		print self.total_right, self.total_left
 
 
 	def push(self, dx, dy):
 		self.move_queue.append((dx,dy))
 		print 'in push'
 
+	#unused
 	def move_dispatch1(self):
         	while True:
         	        print self.move_queue
@@ -146,24 +182,25 @@ class SimpleServer(object):
 			#time.sleep(0.1)
 			#print self.move_queue
 			#with self.move_queue_lock:
-			if self.move_queue:
+			if self.move_queue and (not self.is_paused):
 				(dx, dy) = self.move_queue.pop(0)
+				print 'dx, dy: ', dx, dy
 				if (dx>=0):
 					#tick_step(self.right, Adafruit_MotorHAT.FORWARD, dx)
 					right_worker = threading.Thread(target=stepper_worker, args=(self.right, dx, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.SINGLE))
-
+					self.total_left += dx
 				else:
 					#tick_step(self.right, Adafruit_MotorHAT.BACKWARD, abs(dx))
 					right_worker = threading.Thread(target=stepper_worker, args=(self.right, abs(dx), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.SINGLE))
-
+					self.total_left += dx
 				if (dy>=0):
 					#tick_step(self.left, Adafruit_MotorHAT.FORWARD, dy)
                                         left_worker = threading.Thread(target=stepper_worker, args=(self.left, dy, Adafruit_MotorHAT.FORWARD, Adafruit_MotorHAT.SINGLE))
-
+					self.total_right += dy
 				else:
 					#tick_step(self.left, Adafruit_MotorHAT.BACKWARD, abs(dy))
 					left_worker = threading.Thread(target=stepper_worker, args=(self.left, abs(dy), Adafruit_MotorHAT.BACKWARD, Adafruit_MotorHAT.SINGLE))
-
+					self.total_right += dy
 				#worker1 = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
 				#worker2 = threading.Thread(target=stepper_worker, args=(stepper, steps, direction, Adafruit_MotorHAT.DOUBLE))
 				right_worker.start()
